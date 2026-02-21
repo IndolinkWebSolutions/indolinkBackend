@@ -1,0 +1,28 @@
+# env
+.env
+*.env
+
+# database
+db.sqlite3
+
+# python cache
+__pycache__/
+*.pyc
+
+# media / static if needed
+media/
+static/
+
+# OS
+.DS_Store
+
+
+env/
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+.env
+media/
+staticfiles/
+node_modules/
