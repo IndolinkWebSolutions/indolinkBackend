@@ -13,6 +13,7 @@ from .serializers import (
     LeadPrivateSerializer
 )
 from core.pagination import StandardResultsSetPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from elasticsearch.exceptions import ConnectionError
@@ -56,6 +57,7 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def lead_search(request):
     q = request.GET.get("q", "").strip().lower()
     page_size = int(request.GET.get("page_size", 20))
@@ -121,6 +123,7 @@ def lead_search(request):
     return paginator.get_paginated_response(data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def leads_by_slug(request, slug):
     leads = Lead.objects.filter(slug=slug).order_by("-created_at")
 
