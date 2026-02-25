@@ -46,27 +46,53 @@ def dashboard(request):
 
 
 class CompanyProfileAPIView(APIView):
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        profile = CompanyProfile.objects.filter(user=request.user).first()
+
+        profile = CompanyProfile.objects.filter(
+            name=request.user
+        ).first()
+
         if not profile:
+
             return Response({}, status=200)
+
         return Response(CompanySerializers(profile).data)
 
+
     def post(self, request):
+
         serializer = CompanySerializers(data=request.data)
+
         if serializer.is_valid():
-            serializer.save(user=request.user)
+
+            serializer.save(name=request.user)
+
             return Response(serializer.data, status=201)
+
         return Response(serializer.errors, status=400)
 
+
     def put(self, request):
-        profile = CompanyProfile.objects.get(user=request.user)
-        serializer = CompanySerializers(profile, data=request.data, partial=True)
+
+        profile = CompanyProfile.objects.get(
+            name=request.user
+        )
+
+        serializer = CompanySerializers(
+            profile,
+            data=request.data,
+            partial=True
+        )
+
         if serializer.is_valid():
-            serializer.save(user=request.user)
+
+            serializer.save(name=request.user)
+
             return Response(serializer.data)
+
         return Response(serializer.errors, status=400)
 
 

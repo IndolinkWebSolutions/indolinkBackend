@@ -7,7 +7,7 @@ class CompanySerializers(serializers.ModelSerializer):
     class Meta:
         model = CompanyProfile
         fields ="__all__"
-        read_only_fields = ('user')
+        read_only_fields = ["name"]
 
 # class ClientProductsSerializers(serializers.ModelSerializer):
 #     class Meta:
