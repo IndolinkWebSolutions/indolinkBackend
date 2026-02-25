@@ -1,11 +1,6 @@
 from rest_framework import serializers
 from .models import Lead
 
-
-# -------------------------
-# Masking Helper Functions
-# -------------------------
-
 def mask_mobile(mobile):
     if not mobile or len(mobile) < 4:
         return "****"
@@ -25,28 +20,26 @@ def mask_email(email):
     
     return f"{masked_name}@{domain}"
 
-
 def mask_text(text):
     if not text:
         return None
     return text[0] + "*" * (len(text) - 1)
 
 
-# -------------------------
-# Public Serializer (Masked)
-# -------------------------
 
 class LeadPublicSerializer(serializers.ModelSerializer):
     location = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     mobile_number = serializers.SerializerMethodField()
+    slug = serializers.ReadOnlyField()
 
     class Meta:
         model = Lead
         fields = [
             'id',
-            'name',          # ✅ visible
+            'name',
+            'slug', 
             'requirements',  # ✅ visible
             'location',      # 🔒 masked
             'company',       # 🔒 masked
@@ -68,17 +61,15 @@ class LeadPublicSerializer(serializers.ModelSerializer):
         return mask_mobile(obj.mobile_number)
 
 
-# -------------------------
-# Private Serializer (Unlocked)
-# -------------------------
-
 class LeadPrivateSerializer(serializers.ModelSerializer):
+    slug = serializers.ReadOnlyField()
 
     class Meta:
         model = Lead
         fields = [
             'id',
             'name',
+            'slug',
             'requirements',
             'location',
             'company',

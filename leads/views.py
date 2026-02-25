@@ -120,6 +120,34 @@ def lead_search(request):
 
     return paginator.get_paginated_response(data)
 
+@api_view(['GET'])
+def leads_by_slug(request, slug):
+    leads = Lead.objects.filter(slug=slug).order_by("-created_at")
+
+    unlocked_ids = set()
+
+    if request.user.is_authenticated:
+        unlocked_ids = set(
+            UserLeadAccess.objects.filter(
+                user=request.user,
+                lead__in=leads
+            ).values_list("lead_id", flat=True)
+        )
+
+    data = []
+
+    for lead in leads:
+        if lead.id in unlocked_ids:
+            serializer = LeadPrivateSerializer(lead)
+        else:
+            serializer = LeadPublicSerializer(lead)
+
+        serialized = serializer.data
+        serialized["is_unlocked"] = lead.id in unlocked_ids
+        data.append(serialized)
+
+    return Response(data)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def unlock_lead(request, lead_id):

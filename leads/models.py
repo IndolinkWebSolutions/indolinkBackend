@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
  
 
 class Lead(models.Model):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=300, blank=True)
     requirements = models.CharField(max_length=30)
     email = models.EmailField()
     mobile_number = models.CharField(max_length=15)
@@ -17,7 +19,13 @@ class Lead(models.Model):
             models.Index(fields=['requirements']),
             models.Index(fields=['location']),
             models.Index(fields=['created_at']),
+
         ]
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.requirements)   # 👈 group by requirement
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} - {self.mobile_number}"

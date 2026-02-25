@@ -12,6 +12,7 @@ from users.models import UserProfile
 from .models import UserDecryptedLead
 from leads.models import Lead
 from core.encryption import decrypt, encrypt
+from django.shortcuts import get_object_or_404
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -19,11 +20,15 @@ def decrypt_lead(request, lead_id):
 
     user = request.user
     profile = user.userprofile
-    limit = profile.weekly_decrypt_limit
 
-    if limit == 0:
-        return Response({"error": "Access not allowed"}, status=403)
+    # 1️⃣ Admin Access Check
+    if profile.weekly_lead_limit == 0:
+        return Response(
+            {"error": "Access not granted by admin"},
+            status=403
+        )
 
+    # 2️⃣ Weekly Count Check
     week_start = timezone.now() - timedelta(days=7)
 
     decrypted_count = UserDecryptedLead.objects.filter(
@@ -31,16 +36,29 @@ def decrypt_lead(request, lead_id):
         decrypted_at__gte=week_start
     ).count()
 
-    if decrypted_count >= limit:
-        return Response({"error": "Weekly limit exceeded"}, status=403)
+    if decrypted_count >= profile.weekly_lead_limit:
+        return Response(
+            {"error": "Weekly limit exceeded"},
+            status=403
+        )
 
-    lead = Lead.objects.get(id=lead_id)
+    lead = get_object_or_404(Lead, id=lead_id)
 
-    UserDecryptedLead.objects.create(user=user, lead=lead)
+    # 3️⃣ Prevent Duplicate Count
+    obj, created = UserDecryptedLead.objects.get_or_create(
+        user=user,
+        lead=lead
+    )
+
+    # Agar pehle se decrypt hai to count increase nahi karega
 
     return Response({
-        "company_name": decrypt(encrypt(lead.company_name)),
-        "country": decrypt(encrypt(lead.country)),
-        "email": decrypt(encrypt(lead.email)),
-        "phone": decrypt(encrypt(lead.phone)),
+        "id": lead.id,
+        "name": lead.name,
+        "requirements": lead.requirements,
+        "company": lead.company,
+        "location": lead.location,
+        "email": lead.email,
+        "mobile_number": lead.mobile_number,
+        "created_at": lead.created_at,
     })

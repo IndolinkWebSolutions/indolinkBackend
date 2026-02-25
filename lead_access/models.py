@@ -10,3 +10,4 @@ class UserDecryptedLead(models.Model):
 
     class Meta:
         unique_together = ('user', 'lead')
+ 
