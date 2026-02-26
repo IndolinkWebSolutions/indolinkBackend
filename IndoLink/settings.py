@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     'enquiries',
     'dashboard',
     'leads',
-    'lead_access' 
+ 
 ]
 
 MIDDLEWARE = [

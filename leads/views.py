@@ -183,12 +183,12 @@ def unlock_lead(request, lead_id):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def unlocked_leads(request):
-    leads = Lead.objects.filter(
-        userleadaccess__user=request.user
-    ).order_by('-userleadaccess__accessed_at')
+def leads_history(request):
+    accesses = UserLeadAccess.objects.filter(user=request.user).select_related("lead")
+
+    leads = [access.lead for access in accesses]
 
     serializer = LeadPrivateSerializer(leads, many=True)
     return Response(serializer.data)

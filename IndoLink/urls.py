@@ -10,7 +10,7 @@ urlpatterns = [
     path('enquiries/', include('enquiries.urls')),
     path('products/', include('products.urls')),
     path('leads/', include('leads.urls')),
-    path('lead-access/', include('lead_access.urls')),
+   
 ]
 
 if settings.DEBUG:
