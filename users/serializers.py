@@ -104,3 +104,42 @@ class ResetPasswordSerializer(serializers.Serializer):
         return attrs
 
 
+
+from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
+from .models import UserProfile
+
+
+# 🔹 1. Email Check Serializer
+class CheckEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not UserProfile.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email not registered")
+        return value
+
+
+# 🔹 2. Reset Password Serializer
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(min_length=6)
+
+    def validate(self, data):
+        try:
+            user = UserProfile.objects.get(reset_token=data["token"])
+        except UserProfile.DoesNotExist:
+            raise serializers.ValidationError("Invalid or expired token")
+
+        data["user"] = user
+        return data
+
+    def save(self):
+        user = self.validated_data["user"]
+        password = self.validated_data["password"]
+
+        user.password = make_password(password)
+        user.reset_token = None
+        user.save()
+
+        return user

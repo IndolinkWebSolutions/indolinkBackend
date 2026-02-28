@@ -96,6 +96,7 @@ USE_I18N = True
 USE_TZ = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS=[
+    'https://indolinkexports.com',
     'http://localhost:5173',
     'http://127.0.0.1:8000'
 ]
@@ -131,14 +132,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_app_password'
 
 
 import mimetypes

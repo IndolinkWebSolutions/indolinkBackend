@@ -10,13 +10,12 @@ from django.db import transaction
 from .serializers import UserSignupSerializer
 from rest_framework import status, permissions
 from django.contrib.auth.models import User
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.core.mail import send_mail
-from .serializers import ForgotPasswordSerializer
-from django.conf import settings
-from django.utils.timezone import now
+
+
+
+
+
+
 
 
 @api_view(['GET'])
@@ -102,47 +101,40 @@ class LoginView(APIView):
         )
     
 
+import uuid
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import CheckEmailSerializer, ResetPasswordSerializer
+from .models import UserProfile
 
-class ForgotPasswordView(APIView):
+
+class CheckEmailAPIView(APIView):
     def post(self, request):
-        serializer = ForgotPasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = CheckEmailSerializer(data=request.data)
 
-        user = User.objects.get(email=serializer.validated_data['email'])
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            user = UserProfile.objects.get(email=email)
 
-        uid = urlsafe_base64_encode(force_bytes(user.id))
-        token = PasswordResetTokenGenerator().make_token(user)
+            token = str(uuid.uuid4())
+            user.reset_token = token
+            user.save()
 
-        reset_link = f"http://localhost:3000/reset-password/{uid}/{token}/"
+            return Response({
+                "message": "Email verified",
+                "token": token
+            })
 
-        send_mail(
-            subject="Reset Your Password",
-            message=f"Click the link to reset password:\n{reset_link}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[user.email],
-        )
-
-        return Response(
-            {"message": "Password reset link sent to your email"},
-            status=status.HTTP_200_OK
-        )
-    
+        return Response(serializer.errors, status=400)
 
 
-from .serializers import ResetPasswordSerializer
-
-class ResetPasswordView(APIView):
+class ResetPasswordAPIView(APIView):
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        user = serializer.validated_data['user']
-        user.set_password(serializer.validated_data['new_password'])
-        user.save()
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password reset successful"})
 
-        return Response(
-            {"message": "Password reset successful"},
-            status=status.HTTP_200_OK
-        )
-    
-
+        return Response(serializer.errors, status=400)

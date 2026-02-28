@@ -28,7 +28,7 @@ def mask_text(text):
 
 
 class LeadPublicSerializer(serializers.ModelSerializer):
-    location = serializers.SerializerMethodField()
+    # location = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     mobile_number = serializers.SerializerMethodField()
@@ -48,8 +48,8 @@ class LeadPublicSerializer(serializers.ModelSerializer):
             'created_at'
         ]
 
-    def get_location(self, obj):
-        return mask_text(obj.location)
+    # def get_location(self, obj):
+    #     return mask_text(obj.location)
 
     def get_company(self, obj):
         return mask_text(obj.company)
