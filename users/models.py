@@ -15,6 +15,7 @@ class UserProfile(models.Model):
     email = models.EmailField(max_length=100, unique=True)
     mobile_number = models.CharField(max_length=15, unique=True)
     age = models.PositiveIntegerField(null=True, blank=True)
+    reset_token = models.CharField(max_length=255, null=True, blank=True)
 
     weekly_lead_limit = models.PositiveIntegerField(
         choices=LEAD_ACCESS_CHOICES,
